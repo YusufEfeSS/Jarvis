@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS - Yapay Zeka Asistanı</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #020617;
+    color: #38bdf8;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 15px;
+  }
+
+  header {
+    text-align: center;
+    width: 100%;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: 3px;
+    color: #38bdf8;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  }
+
+  .time-display {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    gap: 12px;
+  }
+
+  /* Ark Reaktörü Animasyonu */
+  .arc-reactor {
+    width: 130px;
+    height: 130px;
+    border: 3px dashed #38bdf8;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.3), inset 0 0 20px rgba(56, 189, 248, 0.3);
+    animation: rotateReactor 10s linear infinite;
+    position: relative;
+  }
+
+  .core {
+    width: 55px;
+    height: 55px;
+    background: radial-gradient(circle, #38bdf8 0%, #0284c7 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 25px #38bdf8, 0 0 50px #38bdf8;
+    animation: pulseCore 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes rotateReactor {
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes pulseCore {
+    0% { transform: scale(0.9); opacity: 0.8; }
+    100% { transform: scale(1.1); opacity: 1; }
+  }
+
+  /* Bilgi Kartları */
+  .info-box {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 10px 14px;
+    width: 100%;
+    font-size: 12px;
+    color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    text-align: left;
+  }
+
+  .info-box span {
+    color: #38bdf8;
+    font-weight: bold;
+  }
+
+  /* Sohbet Ekranı Kutusu */
+  .chat-box {
+    background: rgba(3, 7, 18, 0.9);
+    border: 1px solid #0284c7;
+    border-radius: 10px;
+    width: 100%;
+    height: 110px;
+    overflow-y: auto;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #34d399;
+    text-align: left;
+  }
+
+  /* Kontrol Butonları ve İnput */
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    background: #0f172a;
+    border: 1px solid #0284c7;
+    border-radius: 8px;
+    color: #38bdf8;
+    font-size: 14px;
+    outline: none;
+  }
+
+  button {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: 1px solid #38bdf8;
+    color: white;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    width: 100%;
+    transition: 0.3s;
+    letter-spacing: 1px;
+  }
+
+  button:active {
+    transform: scale(0.97);
+    background: #0369a1;
+  }
+
+  #status {
+    font-size: 12px;
+    color: #38bdf8;
+    min-height: 15px;
+  }
+
+  /* Kurucu Footer */
+  footer {
+    text-align: center;
+    color: #64748b;
+    font-size: 11px;
+    margin-top: 10px;
+    letter-spacing: 1px;
+    width: 100%;
+    border-top: 1px solid #1e293b;
+    padding-top: 8px;
+  }
+
+  footer span {
+    color: #38bdf8;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>J.A.R.V.I.S. AI</h1>
+    <div class="time-display" id="liveClock">Yükleniyor...</div>
+  </header>
+
+  <div class="main-content">
+    <div class="arc-reactor">
+      <div class="core"></div>
+    </div>
+
+    <!-- Şanlıurfa Hava Durumu -->
+    <div class="info-box">
+      📍 Konum: <span>Şanlıurfa</span> | 🌤️ Durum: <span id="weatherText">Güncelleniyor...</span>
+    </div>
+
+    <!-- Sohbet Geçmişi / Yanıt Alanı -->
+    <div class="chat-box" id="chatResponse">
+      JARVIS: Sistem ve yapay zeka bağlantısı kuruldu efendim. Soru sorabilirsiniz...
+    </div>
+
+    <!-- Yazarak Komut Verme -->
+    <input type="text" id="userInput" placeholder="JARVIS'e bir şey yazın ve Enter'a basın..." aria-label="Komut girin">
+
+    <button id="listenBtn">🎤 Sesli Komut Ver</button>
+    <div id="status">Hazır.</div>
+  </div>
+
+  <footer>
+    KURUCU: <span>YUSUF EFE YILDIZ</span>
+  </footer>
+
+<script>
+  const apiKey = "AQ.Ab8RN6J9_H2e5JBYoBdrLVucwLMHyzcieXGhxNK1GeRellgpqg";
+
+  // 1. Canlı Saat
+  function updateClock() {
+    const now = new Date();
+    document.getElementById("liveClock").textContent = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) + " | " + now.toLocaleTimeString('tr-TR');
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // 2. Şanlıurfa Hava Durumu Otomasyonu
+  function loadWeather() {
+    const month = new Date().getMonth() + 1;
+    let weather = "Açık ve Güneşli, 29°C";
+    if (month >= 11 || month <= 2) {
+      weather = "Serin ve Bulutlu, 15°C";
+    } else if (month >= 6 && month <= 8) {
+      weather = "Çok Sıcak, 40°C";
+    }
+    document.getElementById("weatherText").textContent = weather;
+  }
+  loadWeather();
+
+  // Sesli Okuma Fonksiyonu
+  const chatResponse = document.getElementById("chatResponse");
+  function jarvisSpeak(text) {
+    chatResponse.textContent = "JARVIS: " + text;
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "tr-TR";
+    utterance.rate = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // 3. Gerçek Yapay Zeka (Gemini API) Bağlantısı
+  async function askAI(promptText) {
+    if (promptText.toLowerCase().includes("kurucu") || promptText.toLowerCase().includes("seni kim yaptı")) {
+      jarvisSpeak("Bu muazzam sistemi Yusuf Efe Yıldız kurdu ve tasarladı efendim.");
+      return;
+    }
+
+    chatResponse.textContent = "JARVIS: Düşünüyorum...";
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: "Kısa ve net bir JARVIS asistanı gibi Türkçe yanıt ver: " + promptText }] }]
+        })
+      });
+
+      const data = await response.json();
+      if (data.candidates && data.candidates[0].content.parts[0].text) {
+        const reply = data.candidates[0].content.parts[0].text;
+        jarvisSpeak(reply);
+      } else {
+        jarvisSpeak("Üzgünüm efendim, veritabanına ulaşılamadı.");
+      }
+    } catch (error) {
+      jarvisSpeak("Bağlantı hatası oluştu efendim.");
+    }
+  }
+
+  // Yazı Kutusu Dinleyicisi
+  const userInput = document.getElementById("userInput");
+  userInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && userInput.value.trim() !== "") {
+      const val = userInput.value;
+      userInput.value = "";
+      askAI(val);
+    }
+  });
+
+  // 4. Ses Tanıma (Mikrofon)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const statusEl = document.getElementById("status");
+  const listenBtn = document.getElementById("listenBtn");
+
+  if (!SpeechRecognition) {
+    statusEl.textContent = "Tarayıcınız ses tanımayı desteklemiyor.";
+    listenBtn.disabled = true;
+  } else {
+    const recognition = new SpeechRecognition();
+    recognition.lang = "tr-TR";
+    recognition.interimResults = false;
+
+    listenBtn.addEventListener("click", () => {
+      try {
+        recognition.start();
+        statusEl.textContent = "Dinliyorum efendim...";
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    recognition.onresult = (event) => {
+      const command = event.results[0][0].transcript;
+      statusEl.textContent = "Algılanan: " + command;
+      askAI(command);
+    };
+
+    recognition.onerror = () => {
+      statusEl.textContent = "Ses algılanamadı, tekrar deneyin.";
+    };
+  }
+</script>
+
+</body>
+</html>
+
