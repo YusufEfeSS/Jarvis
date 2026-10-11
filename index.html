@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS Asistan</title>
+<style>
+  body {
+    margin: 0;
+    background: #050b14;
+    color: #00ffff;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    text-align: center;
+  }
+  .arc-reactor {
+    width: 150px;
+    height: 150px;
+    border: 4px solid #00ffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px #00ffff, inset 0 0 30px #00ffff;
+    animation: pulse 2s infinite alternate;
+    margin-bottom: 30px;
+  }
+  .core {
+    width: 60px;
+    height: 60px;
+    background: #00ffff;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #fff;
+  }
+  @keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    100% { transform: scale(1.05); opacity: 1; }
+  }
+  h1 { font-size: 24px; letter-spacing: 2px; margin-bottom: 10px; }
+  p { color: #8aa4c8; font-size: 14px; max-width: 300px; margin: 0 auto 20px auto; }
+  button {
+    background: transparent;
+    border: 2px solid #00ffff;
+    color: #00ffff;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ffff50;
+    transition: 0.3s;
+  }
+  button:active {
+    background: #00ffff;
+    color: #050b14;
+  }
+  #status {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #00ff88;
+  }
+</style>
+</head>
+<body>
+
+  <div class="arc-reactor">
+    <div class="core"></div>
+  </div>
+
+  <h1>J.A.R.V.I.S.</h1>
+<p>Sistem çevrimiçi. Komut vermek için butona basıp konuşun.</p>
+
+  <button id="listenBtn">🎤 Dinlemeyi Başlat</button>
+  <div id="status">Hazır...</div>
+
+<script>
+  const statusEl = document.getElementById("status");
+  const listenBtn = document.getElementById("listenBtn");
+
+  // Türkçe sesli yanıt verme fonksiyonu
+  function speak(text) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "tr-TR";
+    utterance.rate = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Tarayıcının ses tanıma özelliği (Speech Recognition)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    statusEl.textContent = "Tarayıcınız ses tanımayı desteklemiyor.";
+    listenBtn.disabled = true;
+  } else {
+    const recognition = new SpeechRecognition();
+    recognition.lang = "tr-TR";
+    recognition.interimResults = false;
+
+    listenBtn.addEventListener("click", () => {
+      try {
+        recognition.start();
+        statusEl.textContent = "Dinliyorum efendim...";
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    recognition.onresult = (event) => {
+      const command = event.results[0][0].transcript.toLowerCase();
+      statusEl.textContent = "Algılanan: " + command;
+
+      // JARVIS'in basit komutlara tepkileri
+      if (command.includes("merhaba") || command.includes("selam")) {
+        speak("Merhaba efendim, sistemler tam kapasite çalışıyor.");
+      } else if (command.includes("saat kaç")) {
+        const now = new Date();
+        const timeString = now.getHours() + " " + now.getMinutes();
+        speak("Şu an saat " + timeString);
+      } else if (command.includes("adın ne") || command.includes("sen kimsin")) {
+        speak("Ben Jiarvis, sizin kişisel web asistanınızım.");
+      } else {
+        speak("Üzgünüm efendim, bu komutu henüz öğrenmedim.");
+      }
+    };
+
+    recognition.onerror = () => {
+      statusEl.textContent = "Ses algılanamadı, tekrar deneyin.";
+    };
+  }
+</script>
+
+</body>
+</html>
+
